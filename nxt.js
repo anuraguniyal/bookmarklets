@@ -26,7 +26,7 @@ while(1){
   if(e.width < w) continue;
   if(e.height < h) continue;
   document._au_c = c = i;
-  // if we are showing anothere image reset done state
+  /* if we are showing anothere image reset done state*/
   document._au_done=false;
   e.scrollIntoView();
   e.style.height = window.innerHeight +'px';
@@ -57,7 +57,7 @@ function show_msg(msg, duration){
   },duration*1000);
   document.body.appendChild(el);
   el.scrollIntoView();
-  console.log(el)
+  console.log(el);
 }
 /* if we are done go to next page */
 if(document._au_done){
