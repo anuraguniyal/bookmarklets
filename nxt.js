@@ -6,6 +6,31 @@ Pass width and height to function which decides how small images to skip
 */
 
 (function(w,h,dir){
+/* create main div where img will be showed*/
+
+var display = document._au_display;
+if(!display){
+  console.log('creating display');
+  display = document.createElement("div");
+  document._au_display = display;
+  document.body.appendChild(display);
+}
+
+function show_image(img){
+  display.setAttribute("style","box-sizing: border-box;position:absolute;top:0%;left:0%;padding:4px;background-color:white;;border:2px solid blue;");
+  display.setAttribute("id", "audisplay");
+  display.style.height = window.innerHeight +'px';
+  display.style.width = window.innerWidth +'px';
+  if (display.hasChildNodes()) {
+    display.removeChild(display.childNodes[0]);
+  }
+  var cimg = img.cloneNode(true);
+  console.log(cimg.width, cimg.height);
+  cimg.style.maxWidth = '100%';
+  cimg.style.maxHeight = '100%';
+  display.appendChild(cimg);
+  display.scrollIntoView();
+}
 var l = document.getElementsByTagName('img');
 var dir_txt = 'next';
 var c=document._au_c||-1;
@@ -28,8 +53,7 @@ while(1){
   document._au_c = c = i;
   /* if we are showing anothere image reset done state*/
   document._au_done=false;
-  e.scrollIntoView();
-  e.style.height = window.innerHeight +'px';
+  show_image(e);
   return;
 }
 
@@ -67,5 +91,6 @@ if(document._au_done){
 /* we are done show msg to user*/
 show_msg("Reached the end of the page, to go to "+dir_txt+" page, click "+dir_txt+" again <br><small>msg will close in 10 secs</small>", 10);
 document._au_done=true;
-})(100, 300, -1);
+})(100, 300, 1);
+
 
