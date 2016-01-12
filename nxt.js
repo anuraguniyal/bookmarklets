@@ -8,16 +8,20 @@ Pass width and height to function which decides how small images to skip
 (function(w,h,dir){
 /* create main div where img will be showed*/
 
-var display = document._au_display;
-if(!display){
+if(!document._au_display){
   console.log('creating display');
+  container = document.createElement("div");
+  container.setAttribute("style","position:absolute;");
   display = document.createElement("div");
   document._au_display = display;
-  document.body.appendChild(display);
+  document._au_container = display;
+  container.appendChild(display);
+  document.body.appendChild(container);
 }
 
 function show_image(img){
-  display.setAttribute("style","box-sizing: border-box;position:absolute;top:0%;left:0%;padding:4px;background-color:white;;border:2px solid blue;");
+  var display = document._au_display;
+  display.setAttribute("style","display:table-cell;vertical-align:middle;text-align:center;box-sizing:border-box;top:0%;left:0%;padding:4px;background-color:white;;border:2px solid blue;");
   display.setAttribute("id", "audisplay");
   display.style.height = window.innerHeight +'px';
   display.style.width = window.innerWidth +'px';
@@ -29,7 +33,7 @@ function show_image(img){
   cimg.style.maxWidth = '100%';
   cimg.style.maxHeight = '100%';
   display.appendChild(cimg);
-  display.scrollIntoView();
+  document._au_container.scrollIntoView();
 }
 var l = document.getElementsByTagName('img');
 var dir_txt = 'next';
@@ -92,5 +96,3 @@ if(document._au_done){
 show_msg("Reached the end of the page, to go to "+dir_txt+" page, click "+dir_txt+" again <br><small>msg will close in 10 secs</small>", 10);
 document._au_done=true;
 })(100, 300, 1);
-
-
