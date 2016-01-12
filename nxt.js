@@ -1,11 +1,10 @@
-javascript:
 /*
 Scrolls the next image into view, at the end optionally moves to next page
 Pass width and height to function which decides how small images to skip
 3rd param to function is dir 1=forward -1=backward
 */
 
-(function(w,h,dir){
+function au_next_prev(w,h,dir){
 /* create main div where img will be showed*/
 
 if(!document._au_display){
@@ -95,4 +94,4 @@ if(document._au_done){
 /* we are done show msg to user*/
 show_msg("Reached the end of the page, to go to "+dir_txt+" page, click "+dir_txt+" again <br><small>msg will close in 10 secs</small>", 10);
 document._au_done=true;
-})(100, 300, 1);
+};
