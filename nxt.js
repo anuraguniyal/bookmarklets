@@ -5,7 +5,20 @@ Pass width and height to function which decides how small images to skip
 */
 
 function au_next_prev(w,h,dir){
-/* create main div where img will be showed*/
+/* bind arrow keys */
+document.onkeydown = function(evt) {
+    evt = evt || window.event;
+    evt.preventDefault();
+    evt.stopPropagation();
+    switch (evt.keyCode) {
+        case 37:
+            au_next_prev(w,h,-1);
+            break;
+        case 39:
+            au_next_prev(w,h,1);
+            break;
+    }
+};
 
 if(!document._au_display){
   console.log('creating display');
@@ -95,3 +108,4 @@ if(document._au_done){
 show_msg("Reached the end of the page, to go to "+dir_txt+" page, click "+dir_txt+" again <br><small>msg will close in 10 secs</small>", 10);
 document._au_done=true;
 };
+
