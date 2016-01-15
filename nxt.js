@@ -5,71 +5,131 @@ Pass width and height to function which decides how small images to skip
 */
 
 function au_next_prev(w,h,dir){
+
+document._au_play_delay = document._au_play_delay||3;
+
+function play_pause(){
+  if(!document._au_play_id){
+    var delay = document._au_play_delay||1;
+    document._au_play_id = setInterval(_play, delay*1000);
+  }else{
+    clearInterval(document._au_play_id);
+    document._au_play_id = null;
+  }
+  update_info(); //refresh
+}
+
+function _play(){
+  au_next_prev(w,h,dir);
+}
 /* bind arrow keys */
 document.onkeydown = function(evt) {
     evt = evt || window.event;
-    evt.preventDefault();
-    evt.stopPropagation();
+    var stop = false;
     switch (evt.keyCode) {
         case 37:
             au_next_prev(w,h,-1);
+            stop=true;
             break;
         case 39:
             au_next_prev(w,h,1);
+            stop=true;
             break;
+        case 'P'.charCodeAt(0):
+            play_pause();
+            stop=true;
+            break;
+    }
+    /* if a number pressed, change delay*/
+    if(evt.keyCode >= 49 && evt.keyCode <= 57){
+      document._au_play_delay=evt.keyCode-48;
+      play_pause();p
+      play_pause();
+      stop = true;
+    }
+    if(stop){
+      evt.preventDefault();
+      evt.stopPropagation();
     }
 };
 
-if(!document._au_display){
-  console.log('creating display');
-  container = document.createElement("div");
+function create_elem(){
+  if(document._au_display) return;
+  var container = document.createElement("div");
   container.setAttribute("style","position:absolute;");
-  display = document.createElement("div");
-  document._au_display = display;
-  document._au_container = display;
+  var bar = document.createElement("div");
+  var display = document.createElement("div");
+  container.appendChild(bar);
   container.appendChild(display);
   document.body.appendChild(container);
+  document._au_display = display;
+  document._au_container = container;
+  document._au_bar = bar;
 }
 
-function show_image(img){
+function update_info(){
+  //info
+  var bar = document._au_bar;
+  var img = images[document._au_c];
+  bar.setAttribute("style","display:block;padding-left:5px;font-size:14px;color:white;background-color:blue;width:100%;height:20px;");
+  var html = (document._au_c+1)+'/'+images.length+" ";
+  html+= " <small>"
+  if(document._au_play_id) html+="(playing ";
+  else html += "(paused ";
+  html+= document._au_play_delay+"s)"
+  html += " <small>"+img.src+" "+img.width+"x"+img.height+ "</small>"
+  bar.innerHTML = html;
+}
+
+function show_current_image(){
+  var img = images[document._au_c];
+  create_elem();
   var display = document._au_display;
+  var container = document._au_container;
   display.setAttribute("style","display:table-cell;vertical-align:middle;text-align:center;box-sizing:border-box;top:0%;left:0%;padding:4px;background-color:white;;border:2px solid blue;");
   display.setAttribute("id", "audisplay");
-  display.style.height = window.innerHeight +'px';
+  display.style.height = (window.innerHeight-20) +'px';
   display.style.width = window.innerWidth +'px';
   if (display.hasChildNodes()) {
     display.removeChild(display.childNodes[0]);
   }
   var cimg = img.cloneNode(true);
-  console.log(cimg.width, cimg.height);
   cimg.style.maxWidth = '100%';
   cimg.style.maxHeight = '100%';
   display.appendChild(cimg);
+
+  update_info();
   document._au_container.scrollIntoView();
 }
-var l = document.getElementsByTagName('img');
+
+function get_images(){
+  var l = document.getElementsByTagName('img');
+  /* filter out images*/
+  var images = [];
+  for(var i=0;i<l.length;i++){
+    var e = l[i];
+    if(e.width < w) continue;
+    if(e.height < h) continue;
+    images.push(e);
+  }
+  return images;
+}
+
+var images = get_images();
 var dir_txt = 'next';
-var c=document._au_c||-1;
+var c=document._au_c;
+if(c==null) c= -1;
 if(dir==-1){
   dir_txt = 'prev';
-  c=document._au_c||l.length;
+  c=document._au_c||images.length;
 }
-var i=c;
-while(1){
-  i += dir;
-  if(dir==1 && i == l.length){
-    break;
-  }
-  if(dir==-1 && i == -1){
-    break;
-  }
-  var e = l[i];
-  if(e.width < w) continue;
-  if(e.height < h) continue;
-  document._au_c = c = i;
-  /* if we are showing anothere image reset done state*/
-  document._au_done=false;
-  show_image(e);
+c += dir;
+console.log(c);
+if(c >=0 && c < images.length){
+  document._au_done=false; //reset
+  document._au_c = c;
+  console.log("--",document._au_c)
+  show_current_image();
   return;
 }
 
