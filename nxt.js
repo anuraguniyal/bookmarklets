@@ -39,11 +39,16 @@ document.onkeydown = function(evt) {
             play_pause();
             stop=true;
             break;
+        case 'H'.charCodeAt(0):
+            if(document._au_help) show_current_image();
+            else show_help();
+            stop=true;
+            break;
     }
     /* if a number pressed, change delay*/
     if(evt.keyCode >= 49 && evt.keyCode <= 57){
       document._au_play_delay=evt.keyCode-48;
-      play_pause();p
+      play_pause();
       play_pause();
       stop = true;
     }
@@ -73,15 +78,34 @@ function update_info(){
   var img = images[document._au_c];
   bar.setAttribute("style","display:block;padding-left:5px;font-size:14px;color:white;background-color:blue;width:100%;height:20px;");
   var html = (document._au_c+1)+'/'+images.length+" ";
-  html+= " <small>"
-  if(document._au_play_id) html+="(playing ";
-  else html += "(paused ";
-  html+= document._au_play_delay+"s)"
-  html += " <small>"+img.src+" "+img.width+"x"+img.height+ "</small>"
+  html+= " <small> - "
+  if(document._au_play_id) html+="playing";
+  else html += "paused";
+  html+= " "+document._au_play_delay+"s - h for help"
+  html += " - "+img.src+" "+img.width+"x"+img.height+ "</small>"
   bar.innerHTML = html;
 }
 
+function show_help(){
+  document._au_help = true;
+  var display = document._au_display;
+  if (display.hasChildNodes()) {
+    display.removeChild(display.childNodes[0]);
+  }
+  var help = document.createElement("div");
+  help.setAttribute("style","display:block;padding:10px;height:100%;text-align:left;vertical-align:top;");
+  var html = [
+    "<h2>Help</h2> Press <b>h</b> to toggle help",
+    "Press next ►  bookmarklet or right arrow key for next image",
+    "Press prev ◀  bookmarklet or left arrow key for next image",
+    "Press <b>p</b> to play or pause images",
+    "Press number keys <b>1</b> to <b>9</b> to change image change time",
+  ]
+  help.innerHTML = html.join("<br>");
+  display.appendChild(help);
+}
 function show_current_image(){
+  document._au_help = false;
   var img = images[document._au_c];
   create_elem();
   var display = document._au_display;
@@ -117,14 +141,17 @@ function get_images(){
 
 var images = get_images();
 var dir_txt = 'next';
-var c=document._au_c;
-if(c==null) c= -1;
 if(dir==-1){
   dir_txt = 'prev';
-  c=document._au_c||images.length;
 }
+if(document._au_c==null){
+  document._au_c = -1;
+  if(dir==-1){
+    document._au_c = images.length;
+  }
+}
+var c=document._au_c;
 c += dir;
-console.log(c);
 if(c >=0 && c < images.length){
   document._au_done=false; //reset
   document._au_c = c;
@@ -149,15 +176,10 @@ function change_page(){
   alert("No "+dir_txt+" link found.");
 }
 function show_msg(msg, duration){
-  var el = document.createElement("div");
-  el.setAttribute("style","position:absolute;top:40%;left:20%;padding:10px;background-color:white;color:red;border:2px solid red;");
-  el.innerHTML = msg;
+  document._au_bar.innerHTML = msg;
   setTimeout(function(){
-    el.parentNode.removeChild(el);
+    update_info();
   },duration*1000);
-  document.body.appendChild(el);
-  el.scrollIntoView();
-  console.log(el);
 }
 /* if we are done go to next page */
 if(document._au_done){
@@ -165,7 +187,7 @@ if(document._au_done){
   return
 }
 /* we are done show msg to user*/
-show_msg("Reached the end of the page, to go to "+dir_txt+" page, click "+dir_txt+" again <br><small>msg will close in 10 secs</small>", 10);
+show_msg("Reached the end of the page, to go to "+dir_txt+" page, click "+dir_txt+" again. <small>msg will close in 10 secs</small>", 10);
 document._au_done=true;
 };
 
