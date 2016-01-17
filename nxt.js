@@ -8,6 +8,25 @@ function au_next_prev(w,h,dir){
 
 document._au_play_delay = document._au_play_delay||3;
 
+function create_elem(){
+  if(document._au_display) return;
+  var container = document.createElement("div");
+  container.id = 'au_container';
+  container.setAttribute("style","position:absolute;");
+  var bar = document.createElement("div");
+  bar.id = 'au_bar';
+  var display = document.createElement("div");
+  display.id = 'au_display';
+  container.appendChild(bar);
+  container.appendChild(display);
+  document.body.appendChild(container);
+  document._au_display = display;
+  document._au_container = container;
+  document._au_bar = bar;
+}
+
+create_elem();
+
 function play_pause(){
   if(!document._au_play_id){
     var delay = document._au_play_delay||1;
@@ -58,72 +77,85 @@ document.onkeydown = function(evt) {
     }
 };
 
-function create_elem(){
-  if(document._au_display) return;
-  var container = document.createElement("div");
-  container.setAttribute("style","position:absolute;");
-  var bar = document.createElement("div");
-  var display = document.createElement("div");
-  container.appendChild(bar);
-  container.appendChild(display);
-  document.body.appendChild(container);
-  document._au_display = display;
-  document._au_container = container;
-  document._au_bar = bar;
+function update_container(){
+  var display = document._au_display;
+  var container = document._au_container;
+  var bar = document._au_bar;
+  bar.setAttribute("style","display:block;padding-left:5px;font-size:14px;color:white;background-color:blue;width:100%;height:20px;");
+  container.setAttribute("style", "padding:0;width:100%;border:2px solid blue;")
+  display.setAttribute("style","width:100%;display:table-cell;vertical-align:middle;text-align:center;padding:4px;background-color:white;");
+  display.setAttribute("id", "audisplay");
+  display.style.height = (window.innerHeight-24) +'px';
+  display.style.width = (window.innerWidth-4) +'px';
 }
 
 function update_info(){
-  //info
+  var html = "";
+  if(images.length==0){
+    html = "No Images > "+w+"x"+h+" found.";
+  }else{
+    var img = images[document._au_c];
+    var html = (document._au_c+1)+'/'+images.length+" ";
+    html+= " <small> - "
+    if(document._au_play_id) html+="playing";
+    else html += "paused";
+    html+= " "+document._au_play_delay+"s - h for help"
+    html += " - "+img.src+" "+img.width+"x"+img.height+ "</small>"
+  }
+  show_msg(html);
+}
+function show_msg(msg){
   var bar = document._au_bar;
-  var img = images[document._au_c];
-  bar.setAttribute("style","display:block;padding-left:5px;font-size:14px;color:white;background-color:blue;width:100%;height:20px;");
-  var html = (document._au_c+1)+'/'+images.length+" ";
-  html+= " <small> - "
-  if(document._au_play_id) html+="playing";
-  else html += "paused";
-  html+= " "+document._au_play_delay+"s - h for help"
-  html += " - "+img.src+" "+img.width+"x"+img.height+ "</small>"
-  bar.innerHTML = html;
+  bar.innerHTML = msg;
+  update_container();
+  document._au_container.scrollIntoView();
 }
 
+function show_timed_msg(msg, duration){
+  show_msg(msg);
+  setTimeout(function(){
+    update_info();
+  },duration*1000);
+}
 function show_help(){
+  update_container();
   document._au_help = true;
   var display = document._au_display;
   if (display.hasChildNodes()) {
     display.removeChild(display.childNodes[0]);
   }
   var help = document.createElement("div");
-  help.setAttribute("style","display:block;padding:10px;height:100%;text-align:left;vertical-align:top;");
+  help.setAttribute("style","font-size:20px;line-height:150%;display:block;padding:10px;height:100%;text-align:left;vertical-align:top;");
   var html = [
-    "<h2>Help</h2> Press <b>h</b> to toggle help",
-    "Press next ►  bookmarklet or right arrow key for next image",
-    "Press prev ◀  bookmarklet or left arrow key for next image",
-    "Press <b>p</b> to play or pause images",
-    "Press number keys <b>1</b> to <b>9</b> to change image change time",
+    "<h2>Help</h2> <ul>",
+    "<li>Press <b>h</b> to toggle help</li>",
+    "<li>Press next ►  bookmarklet or right arrow key for next image</li>",
+    "<li>Press prev ◀  bookmarklet or left arrow key for next image</li>",
+    "<li>Press <b>p</b> to play or pause images</li>",
+    "<li>Press number keys <b>1</b> to <b>9</b> to change image change time</li>",
+    "</ul>"
   ]
-  help.innerHTML = html.join("<br>");
+  help.innerHTML = html.join("\n");
   display.appendChild(help);
 }
 function show_current_image(){
   document._au_help = false;
-  var img = images[document._au_c];
-  create_elem();
   var display = document._au_display;
   var container = document._au_container;
-  display.setAttribute("style","display:table-cell;vertical-align:middle;text-align:center;box-sizing:border-box;top:0%;left:0%;padding:4px;background-color:white;;border:2px solid blue;");
-  display.setAttribute("id", "audisplay");
-  display.style.height = (window.innerHeight-20) +'px';
-  display.style.width = window.innerWidth +'px';
+  update_container();
   if (display.hasChildNodes()) {
     display.removeChild(display.childNodes[0]);
   }
-  var cimg = img.cloneNode(true);
-  cimg.style.maxWidth = '100%';
-  cimg.style.maxHeight = '100%';
-  display.appendChild(cimg);
 
+  if(images.length>0){
+    var img = images[document._au_c];
+    var cimg = img.cloneNode(true);
+    cimg.style.maxWidth = '100%';
+    cimg.style.maxHeight = '100%';
+    display.appendChild(cimg);
+  }
   update_info();
-  document._au_container.scrollIntoView();
+  container.scrollIntoView();
 }
 
 function get_images(){
@@ -175,19 +207,14 @@ function change_page(){
   }
   alert("No "+dir_txt+" link found.");
 }
-function show_msg(msg, duration){
-  document._au_bar.innerHTML = msg;
-  setTimeout(function(){
-    update_info();
-  },duration*1000);
-}
+
 /* if we are done go to next page */
 if(document._au_done){
   change_page();
   return
 }
 /* we are done show msg to user*/
-show_msg("Reached the end of the page, to go to "+dir_txt+" page, click "+dir_txt+" again. <small>msg will close in 10 secs</small>", 10);
+show_timed_msg("Reached the end of the page, to go to "+dir_txt+" page, click "+dir_txt+" again. <small>msg will close in 10 secs</small>", 10);
 document._au_done=true;
 };
 
