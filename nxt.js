@@ -82,11 +82,11 @@ function update_container(){
   var container = document._au_container;
   var bar = document._au_bar;
   bar.setAttribute("style","display:block;padding-left:5px;font-size:14px;color:white;background-color:blue;width:100%;height:20px;");
-  container.setAttribute("style", "padding:0;width:100%;border:2px solid blue;")
+  container.setAttribute("style", "box-sizing:border-box;padding:0;width:100%;border:2px solid blue;")
   display.setAttribute("style","width:100%;display:table-cell;vertical-align:middle;text-align:center;padding:4px;background-color:white;");
   display.setAttribute("id", "audisplay");
   display.style.height = (window.innerHeight-24) +'px';
-  display.style.width = (window.innerWidth-4) +'px';
+  //display.style.width = (window.innerWidth-12) +'px';
 }
 
 function update_info(){
@@ -150,6 +150,7 @@ function show_current_image(){
   if(images.length>0){
     var img = images[document._au_c];
     var cimg = img.cloneNode(true);
+    cimg.className = 'au_img'
     cimg.style.maxWidth = '100%';
     cimg.style.maxHeight = '100%';
     display.appendChild(cimg);
@@ -166,6 +167,8 @@ function get_images(){
     var e = l[i];
     if(e.width < w) continue;
     if(e.height < h) continue;
+    /*  skip our images */
+    if(e.className=='au_img') continue;
     images.push(e);
   }
   return images;
@@ -217,4 +220,3 @@ if(document._au_done){
 show_timed_msg("Reached the end of the page, to go to "+dir_txt+" page, click "+dir_txt+" again. <small>msg will close in 10 secs</small>", 10);
 document._au_done=true;
 };
-
