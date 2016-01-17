@@ -86,7 +86,7 @@ function update_container(){
   display.setAttribute("style","width:100%;display:table-cell;vertical-align:middle;text-align:center;padding:4px;background-color:white;");
   display.setAttribute("id", "audisplay");
   display.style.height = (window.innerHeight-24) +'px';
-  //display.style.width = (window.innerWidth-12) +'px';
+  display.style.width = (window.innerWidth-12) +'px';
 }
 
 function update_info(){
