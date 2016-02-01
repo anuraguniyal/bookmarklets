@@ -4,7 +4,7 @@ Pass width and height to function which decides how small images to skip
 3rd param to function is dir 1=forward -1=backward
 */
 
-function au_next_prev(w,h,dir){
+function au_next_prev(w,h,dir,no_href){
 
 document._au_play_delay = document._au_play_delay||3;
 
@@ -94,13 +94,16 @@ function update_info(){
   if(images.length==0){
     html = "No Images > "+w+"x"+h+" found.";
   }else{
-    var img = images[document._au_c];
+    var src = images[document._au_c][1];
     var html = (document._au_c+1)+'/'+images.length+" ";
     html+= " <small> - "
     if(document._au_play_id) html+="playing";
     else html += "paused";
     html+= " "+document._au_play_delay+"s - h for help"
-    html += " - "+img.src+" "+img.width+"x"+img.height+ "</small>"
+    html += " - "+src;
+    if(images[document._au_c][0]=='a'){
+      html +=" [link]"
+    }
   }
   show_msg(html);
 }
@@ -148,8 +151,9 @@ function show_current_image(){
   }
 
   if(images.length>0){
-    var img = images[document._au_c];
-    var cimg = img.cloneNode(true);
+    var src = images[document._au_c][1];
+    var cimg = document.createElement('img')
+    cimg.src = src;
     cimg.className = 'au_img'
     cimg.style.maxWidth = '100%';
     cimg.style.maxHeight = '100%';
@@ -165,11 +169,25 @@ function get_images(){
   var images = [];
   for(var i=0;i<l.length;i++){
     var e = l[i];
-    if(e.width < w) continue;
-    if(e.height < h) continue;
+    // skip small images
+    if(e.width < w || e.height < h){
+      //unless parent is an anchor point to image
+      if(e.parentElement.tagName!='A' || no_href){
+        continue
+      }
+      //if it is thumbnail it would point to same site?
+      // an will end with same ext?
+      var img_ext = e.src.split('.').pop();
+      var href_ext = e.parentElement.href.split('.').pop();
+      if(img_ext == href_ext){
+        //some point to a page not image
+        images.push(['a',e.parentElement.href.replace('/v/','/i/')]);
+      }
+      continue;
+    }
     /*  skip our images */
     if(e.className=='au_img') continue;
-    images.push(e);
+    images.push(['img',e.src]);
   }
   return images;
 }
