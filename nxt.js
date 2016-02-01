@@ -175,13 +175,26 @@ function get_images(){
       if(e.parentElement.tagName!='A' || no_href){
         continue
       }
-      //if it is thumbnail it would point to same site?
-      // an will end with same ext?
-      var img_ext = e.src.split('.').pop();
-      var href_ext = e.parentElement.href.split('.').pop();
-      if(img_ext == href_ext){
+      //if it is thumbnail it would point to same file?
+      // or will end with same ext?
+      var href=e.parentElement.href;
+      var img_file = e.src.split('/').pop();
+      var href_file = href.split('/').pop();
+      img_file = img_file.split('.');
+      href_file = href_file.split('.');
+      //there may or may not be ext so just add empty ext to end
+      img_file.push('');
+      href_file.push('');
+
+      if(img_file[0] == href_file[0] || img_file[1] == href_file[1]){
         //some point to a page not image
-        images.push(['a',e.parentElement.href.replace('/v/','/i/')]);
+        if(e.parentElement.href.indexOf('/v/')>0){
+          href = href.replace('/v/','/i/');
+          if(img_file[1] != href_file[1]){
+            href+="."+img_file[1];//add image ext
+          }
+        }
+        images.push(['a',href]);
       }
       continue;
     }
